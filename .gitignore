@@ -1,3 +1,14 @@
+# Video Files
+*.mkv
+*.mp4
+*.avi
+*.mov
+*.flv
+*.wmv
+*.webm
+*.m4v
+
+
 # Logs
 logs
 *.log
