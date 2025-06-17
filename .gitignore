@@ -16,6 +16,10 @@
 *.ogg
 *.m4a
 
+# SRT Files
+*.srt
+
+
 
 # Logs
 logs
