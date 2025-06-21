@@ -1,3 +1,6 @@
 [submodule "backend/translate/IndicTransToolkit"]
 	path = backend/translate/IndicTransToolkit
 	url = https://github.com/VarunGumma/IndicTransToolkit.git
+[submodule "backend/translate/IndicTrans2"]
+	path = backend/translate/IndicTrans2
+	url = https://github.com/AI4Bharat/IndicTrans2.git
