@@ -19,6 +19,10 @@
 # SRT Files
 *.srt
 
+# Python Caches
+__pycache__/
+*.pyc
+
 
 
 # Logs
