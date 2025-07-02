@@ -1,5 +1,5 @@
 from parse_srt import parse_srt
-from dub_audio import generate_audio  # assuming the new function lives there
+from dub_audio import debug_single_tts, generate_audio  # assuming the new function lives there
 
 def main():
     srt_path = "test_sample2_translated.srt"
@@ -17,6 +17,9 @@ def main():
         input_audio_path=input_audio,
         output_audio_path=output_audio
     )
+
+    # debug_single_tts(subtitles[0], speaker_wav="clean_voice.wav", output_path="debug_sub0.wav")
+
 
 if __name__ == "__main__":
     main()
