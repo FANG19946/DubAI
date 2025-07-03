@@ -24,9 +24,10 @@ __pycache__/
 *.pyc
 
 
-# dumps
+# dumps and json
 subtitle_dump.json
 subtitles_dump.json
+output_metadata.json
 
 
 # not ready for commit yet
