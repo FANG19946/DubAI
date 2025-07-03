@@ -2,6 +2,13 @@ import torch
 from TTS.api import TTS
 from pydub import AudioSegment
 import numpy as np
+import librosa
+import soundfile as sf
+import io
+# Testing
+import json
+
+
 
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -21,11 +28,24 @@ def generate_audio(subtitles, speaker_wav, input_audio_path, output_audio_path):
 
     DEBUG_LIMIT = 5
 
+    offset = 0
+
     for i, sub in enumerate(subtitles):
         text = sub["text"]
-        start = sub["start"]
-        end = sub["end"]
-        duration = end - start
+
+
+        # Original times
+        original_start = sub["start"]
+        original_end = sub["end"]
+        duration = original_end - original_start
+
+        
+        # Shifted positions in the edited audio
+        start = original_start + offset
+        end = original_end + offset
+
+
+        # limiter
         if i >= DEBUG_LIMIT:
             break
 
@@ -66,27 +86,21 @@ def generate_audio(subtitles, speaker_wav, input_audio_path, output_audio_path):
             channels=1,
         ).set_frame_rate(frame_rate)
 
-        dubbed = adjust_to_duration(dubbed, duration)
 
         # Replace segment in original
         original = original[:start] + dubbed + original[end:]
 
+        # Compute offset introduced by mismatch
+        actual_duration = len(dubbed)
+        offset += actual_duration - duration
+
+        sub["dub_start"] = start
+        sub["dub_end"] = start + actual_duration
+
     original.export(output_audio_path, format="wav")
     print(f"✅ Dubbed audio exported to: {output_audio_path}")
-
-
-def adjust_to_duration(audio, target_duration):
-    """
-    Adjust audio length by speeding up or padding to match target duration in ms.
-    """
-    current_duration = len(audio)
-    if current_duration > target_duration:
-        speed_factor = current_duration / target_duration
-        audio = audio.speedup(playback_speed=speed_factor, chunk_size=50, crossfade=25)
-    elif current_duration < target_duration:
-        silence = AudioSegment.silent(duration=target_duration - current_duration)
-        audio += silence
-    return audio
+    with open("output_metadata.json", "w", encoding="utf-8") as f:
+        json.dump(subtitles, f, ensure_ascii=False, indent=2)
 
 
 def debug_single_tts(sub, speaker_wav, output_path="debug_output.wav"):

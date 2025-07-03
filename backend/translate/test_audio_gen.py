@@ -3,7 +3,7 @@ from dub_audio import debug_single_tts, generate_audio  # assuming the new funct
 
 def main():
     srt_path = "test_sample2_translated.srt"
-    speaker_wav = "clean_voice.wav"
+    speaker_wav = "clean_voice2.wav"
     input_audio = "test_sample2.wav"
     output_audio = "translated_audio.wav"
 
