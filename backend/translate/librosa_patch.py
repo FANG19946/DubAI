@@ -5,67 +5,77 @@ from pydub import AudioSegment
 import numpy as np
 import io
 
-# 📥 Inputs
-input_wav = "translated_audio.wav"
-subtitle_json = "output_metadata.json"
-output_wav = "dubbed_patched.wav"
+def patch_audio_with_librosa():
+    input_wav = "translated_audio.wav"
+    output_wav = "dubbed_patched.wav"
+    subtitle_json = "output_metadata.json"
 
-# 🎧 Load full dubbed audio
-print(f"📂 Loading: {input_wav}")
-full_audio = AudioSegment.from_wav(input_wav)
+    print(f"📂 Loading: {input_wav}")
+    full_audio = AudioSegment.from_wav(input_wav)
 
-# 📑 Load subtitle metadata
-with open(subtitle_json, "r", encoding="utf-8") as f:
-    subtitles = json.load(f)
+    with open(subtitle_json, "r", encoding="utf-8") as f:
+        subtitles = json.load(f)
 
-patched_audio = full_audio
-offset = 0  # Tracks cumulative stretch offset
+    patched_audio = full_audio
+    offset = 0
 
-for i, sub in enumerate(subtitles):
-    try:
-        start = sub["dub_start"] + offset
-        end = sub["dub_end"] + offset
-        target_duration = sub["end"] - sub["start"]
+    for i, sub in enumerate(subtitles):
+        try:
+            if "dub_start" not in sub or "dub_end" not in sub:
+                print(f"⚠️ [# {i}] Skipping: no dub_start/dub_end")
+                continue
 
-        segment = patched_audio[start:end]
+            start = sub["dub_start"] + offset
+            end = sub["dub_end"] + offset
+            target_duration = sub["end"] - sub["start"]
 
-        if abs(len(segment) - target_duration) < 30:
-            print(f"✅ [# {i}] Skipping — duration close enough.")
+            if end <= start:
+                print(f"❌ [# {i}] Invalid segment range ({start}-{end})")
+                continue
+
+            segment = patched_audio[start:end]
+
+            if len(segment) < 300:
+                print(f"⏭️ [# {i}] Skipping short segment ({len(segment)}ms)")
+                continue
+
+            if abs(len(segment) - target_duration) < 30:
+                print(f"✅ [# {i}] Duration close enough — skipping.")
+                continue
+
+            print(f"🎛️ [# {i}] Patching: {len(segment)}ms → {target_duration}ms")
+
+            segment = segment.set_channels(1).set_frame_rate(22050)
+            samples = np.array(segment.get_array_of_samples()).astype(np.float32) / 32768.0
+            sr = segment.frame_rate
+
+            ratio = len(segment) / target_duration
+            print(f"📐 Stretch ratio: {ratio:.3f}")
+
+            stretched = librosa.effects.time_stretch(samples, rate=ratio)
+
+            buf = io.BytesIO()
+            sf.write(buf, stretched, sr, format="WAV", subtype="PCM_16")
+            buf.seek(0)
+            adjusted = AudioSegment.from_file(buf, format="wav")
+
+            if len(adjusted) < target_duration:
+                adjusted += AudioSegment.silent(duration=target_duration - len(adjusted))
+            elif len(adjusted) > target_duration:
+                adjusted = adjusted[:target_duration]
+
+            adjusted = adjusted.fade_in(10).fade_out(10)
+
+            patched_audio = patched_audio[:start] + adjusted + patched_audio[end:]
+            offset += len(adjusted) - (end - start)
+
+        except Exception as e:
+            print(f"❌ [# {i}] Error: {e}")
             continue
 
-        print(f"🎛️ [# {i}] Patching duration mismatch")
-        print(f"    → Segment: {len(segment)}ms | Target: {target_duration}ms")
+    patched_audio.export(output_wav, format="wav")
+    print(f"✅ Patched audio saved: {output_wav}")
 
-        # Convert to NumPy
-        samples = np.array(segment.get_array_of_samples()).astype(np.float32)
-        sr = segment.frame_rate
 
-        # Time-stretch
-        ratio = len(segment) / target_duration
-        stretched = librosa.effects.time_stretch(samples, rate=ratio)
-
-        # Convert back to AudioSegment
-        buf = io.BytesIO()
-        sf.write(buf, stretched, sr, format="WAV")
-        buf.seek(0)
-        adjusted = AudioSegment.from_file(buf, format="wav")
-
-        # Final pad/trim
-        if len(adjusted) < target_duration:
-            adjusted += AudioSegment.silent(duration=target_duration - len(adjusted))
-        elif len(adjusted) > target_duration:
-            adjusted = adjusted[:target_duration]
-
-        # Replace in patched_audio
-        patched_audio = patched_audio[:start] + adjusted + patched_audio[end:]
-
-        # Track stretch offset
-        offset += len(adjusted) - (end - start)
-
-    except Exception as e:
-        print(f"❌ [# {i}] Failed to patch: {e}")
-        continue
-
-# 💾 Save final result
-patched_audio.export(output_wav, format="wav")
-print(f"✅ Patched audio saved to: {output_wav}")
+# 🔁 Run it immediately
+patch_audio_with_librosa()
