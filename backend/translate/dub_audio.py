@@ -26,7 +26,7 @@ def generate_audio(subtitles, speaker_wav, input_audio_path, output_audio_path):
     frame_rate = original.frame_rate
     audio_duration = len(original)
 
-    DEBUG_LIMIT = 5
+    # DEBUG_LIMIT = 5
 
     offset = 0
 
@@ -46,11 +46,11 @@ def generate_audio(subtitles, speaker_wav, input_audio_path, output_audio_path):
 
 
         # limiter
-        if i >= DEBUG_LIMIT:
-            break
+        # if i >= DEBUG_LIMIT:
+            # break
 
         end = min(end, audio_duration)
-        if start >= audio_duration:
+        if start >= audio_duration + offset:
             break
 
         if duration <= 0 or not text.strip():

@@ -5,7 +5,7 @@ def main():
     srt_path = "test_sample2_translated.srt"
     speaker_wav = "clean_voice2.wav"
     input_audio = "test_sample2.wav"
-    output_audio = "translated_audio.wav"
+    output_audio = "translated_audio2.wav"
 
     # Step 1: Parse subtitle file
     subtitles = parse_srt(srt_path)

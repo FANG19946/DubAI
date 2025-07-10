@@ -28,10 +28,15 @@ __pycache__/
 subtitle_dump.json
 subtitles_dump.json
 output_metadata.json
+output_metadata1.json
 
 
 # not ready for commit yet
 generate_audio.py
+
+# Environment Variables
+.env
+
 
 # Logs
 logs

@@ -6,8 +6,8 @@ import numpy as np
 import io
 
 def patch_audio_with_librosa():
-    input_wav = "translated_audio.wav"
-    output_wav = "dubbed_patched.wav"
+    input_wav = "translated_audio2.wav"
+    output_wav = "dubbed_patched2.wav"
     subtitle_json = "output_metadata.json"
 
     print(f"📂 Loading: {input_wav}")
