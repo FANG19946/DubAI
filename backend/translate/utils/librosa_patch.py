@@ -6,9 +6,15 @@ import numpy as np
 import io
 
 def patch_audio_with_librosa():
-    input_wav = "translated_audio2.wav"
-    output_wav = "dubbed_patched2.wav"
-    subtitle_json = "output_metadata.json"
+
+    base_wav_path = "data/wav/"  
+    base_json_path = "data/json/"  
+
+
+
+    input_wav =  base_wav_path + "hi_10_to_15.wav"
+    output_wav =base_wav_path + "librosa_patched.wav"
+    subtitle_json = base_json_path + "output_metadata.json"
 
     print(f"📂 Loading: {input_wav}")
     full_audio = AudioSegment.from_wav(input_wav)
@@ -67,7 +73,10 @@ def patch_audio_with_librosa():
             adjusted = adjusted.fade_in(10).fade_out(10)
 
             patched_audio = patched_audio[:start] + adjusted + patched_audio[end:]
+            print(f"📏 [# {i}] Adjusted length: {len(adjusted)}ms, Target: {target_duration}ms, Delta: {len(adjusted) - target_duration}ms")
+
             offset += len(adjusted) - (end - start)
+            print(f"🧭 [# {i}] Offset updated: {offset}ms\n")
 
         except Exception as e:
             print(f"❌ [# {i}] Error: {e}")

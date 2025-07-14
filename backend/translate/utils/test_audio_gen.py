@@ -2,10 +2,15 @@ from parse_srt import parse_srt
 from dub_audio import debug_single_tts, generate_audio  # assuming the new function lives there
 
 def main():
-    srt_path = "test_sample2_translated.srt"
-    speaker_wav = "clean_voice2.wav"
-    input_audio = "test_sample2.wav"
-    output_audio = "translated_audio2.wav"
+
+    base_srt_path = "data/srt/"  
+    base_wav_path = "data/wav/"  
+
+
+    srt_path = base_srt_path + "hi_10_to_15.srt"
+    speaker_wav = base_wav_path + "clean_voice2.wav"
+    input_audio = base_wav_path + "eng_10_to_15.wav"
+    output_audio = base_wav_path + "hi_10_to_15.wav"
 
     # Step 1: Parse subtitle file
     subtitles = parse_srt(srt_path)

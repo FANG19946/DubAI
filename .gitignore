@@ -19,6 +19,9 @@
 # SRT Files
 *.srt
 
+# RTTM Files
+*.rttm
+
 # Python Caches
 __pycache__/
 *.pyc

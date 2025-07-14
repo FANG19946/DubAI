@@ -2,8 +2,10 @@ from translate_utils import translate_subtitles_to_hindi
 from parse_srt import parse_srt, write_srt_from_parsed  # assumes you have this already
 
 def main():
-    input_srt = "test_sample2.srt"
-    output_srt = "test_sample2_translated.srt"
+    base_path = "data/srt/"  
+
+    input_srt = base_path + "eng_10_to_15.srt"
+    output_srt = base_path + "hi_10_to_15.srt"
 
     # Parse original English subtitles
     subs = parse_srt(input_srt)
