@@ -14,7 +14,7 @@ def patch_audio_with_librosa():
 
     input_wav =  base_wav_path + "hi_10_to_15.wav"
     output_wav =base_wav_path + "librosa_patched.wav"
-    subtitle_json = base_json_path + "output_metadata.json"
+    subtitle_json = base_json_path + "hindi_dub.json"
 
     print(f"📂 Loading: {input_wav}")
     full_audio = AudioSegment.from_wav(input_wav)
@@ -51,7 +51,7 @@ def patch_audio_with_librosa():
 
             print(f"🎛️ [# {i}] Patching: {len(segment)}ms → {target_duration}ms")
 
-            segment = segment.set_channels(1).set_frame_rate(22050)
+            segment = segment.set_channels(1).set_frame_rate(16000)
             samples = np.array(segment.get_array_of_samples()).astype(np.float32) / 32768.0
             sr = segment.frame_rate
 

@@ -50,7 +50,7 @@ def generate_audio(subtitles, speaker_wav, input_audio_path, output_audio_path):
 
         
 
-        end = min(end, audio_duration)
+        # end = min(end, audio_duration)
         if start >= audio_duration + offset:
             break
 
