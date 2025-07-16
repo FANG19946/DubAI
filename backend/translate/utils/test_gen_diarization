@@ -1,0 +1,19 @@
+from speaker_utils import gen_dialogue_wav
+
+def main():
+    audio_filename = 'eng_10_to_15.wav'
+    srt_filename = 'eng_10_to_15.srt'
+    output_filename = 'dialogue_diarization.wav'
+    silence_ms = 1000  # 1 second of silence between dialogue clips
+
+    gen_dialogue_wav(
+        audio_path=audio_filename,
+        srt_path=srt_filename,
+        silence_duration=silence_ms,
+        save_path=output_filename
+    )
+
+    print(f"✅ Dialogue diarization audio saved as: {output_filename}")
+
+if __name__ == "__main__":
+    main()
