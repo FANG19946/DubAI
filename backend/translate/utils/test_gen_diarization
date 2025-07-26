@@ -1,19 +1,26 @@
-from speaker_utils import gen_dialogue_wav
+from speaker_utils import gen_dialogue_array  # Your embedding function
+from speaker_utils import extract_embedding     # Your segment generation function
 
 def main():
-    audio_filename = 'eng_10_to_15.wav'
-    srt_filename = 'eng_10_to_15.srt'
-    output_filename = 'dialogue_diarization.wav'
-    silence_ms = 1000  # 1 second of silence between dialogue clips
+    # Load segmented dialogues
+    base_wav_path = "data/wav/"  
+    base_srt_path = "data/srt/"  
 
-    gen_dialogue_wav(
-        audio_path=audio_filename,
-        srt_path=srt_filename,
-        silence_duration=silence_ms,
-        save_path=output_filename
+    segments = gen_dialogue_array(
+        audio_path=  "eng_10_to_15.wav",  # replace with actual filename
+        srt_path= "eng_10_to_15.srt"
     )
 
-    print(f"✅ Dialogue diarization audio saved as: {output_filename}")
+    print(f"Total segments: {len(segments)}")
+
+    for i in range(min(2, len(segments))):  # Only first 2 segments
+        seg = segments[i]
+        print(f"\n--- Segment {i} ---")
+        print(f"Start: {seg.start} ms, End: {seg.end} ms")
+
+        emb = extract_embedding(seg.audio)  # Your embedding extractor
+        print("Embedding shape:", emb.shape)
+        print("Embedding (first 5 values):", emb[:5])  # Preview first few values
 
 if __name__ == "__main__":
     main()
