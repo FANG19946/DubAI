@@ -1,5 +1,6 @@
 from speaker_utils import gen_dialogue_array  # Your embedding function
-from speaker_utils import extract_embedding     # Your segment generation function
+from speaker_utils import extract_embedding, plot_speaker_embeddings     # Your segment generation function
+from tqdm import tqdm
 
 def main():
     # Load segmented dialogues
@@ -13,14 +14,16 @@ def main():
 
     print(f"Total segments: {len(segments)}")
 
-    for i in range(min(2, len(segments))):  # Only first 2 segments
-        seg = segments[i]
-        print(f"\n--- Segment {i} ---")
-        print(f"Start: {seg.start} ms, End: {seg.end} ms")
+    embeddings = []
+    for idx, seg in enumerate(tqdm(segments, desc="Extracting Embeddings")):
+        emb = extract_embedding(seg.audio)
+        embeddings.append(emb)
+        
+    print("Embedding Extractions Complete")
 
-        emb = extract_embedding(seg.audio)  # Your embedding extractor
-        print("Embedding shape:", emb.shape)
-        print("Embedding (first 5 values):", emb[:5])  # Preview first few values
+    plot_speaker_embeddings(embeddings, "umap_clusters.png")
+
+
 
 if __name__ == "__main__":
     main()

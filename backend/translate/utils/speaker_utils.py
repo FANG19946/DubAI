@@ -6,6 +6,9 @@ import torchaudio
 import numpy as np
 import io
 from speechbrain.inference import SpeakerRecognition
+import matplotlib.pyplot as plt
+import seaborn as sns
+import umap
 
 import os
 
@@ -76,3 +79,30 @@ def extract_embedding(audio_segment: AudioSegment):
 
     # Shape [1, 1, 192] -> squeeze to [192]
     return embedding.squeeze().detach().cpu().numpy()
+
+
+
+def plot_speaker_embeddings(embeddings, save_name="umap_clusters.png", title="Speaker Embedding Clusters via UMAP"):
+    base_plot_path = "data/plots/"
+
+    if not isinstance(embeddings, np.ndarray):
+        embeddings = np.array(embeddings)
+
+    reducer = umap.UMAP(random_state=42)
+    embedding_2d = reducer.fit_transform(embeddings)
+
+    sns.set_theme(style="whitegrid", palette="muted", font_scale=1.2)
+    plt.figure(figsize=(12, 8), dpi=150)
+
+    # Plot each point as a number (1-based index)
+    for i, (x, y) in enumerate(embedding_2d):
+        plt.text(x, y, str(i + 1), fontsize=50, ha='center', va='center', color='mediumslateblue', weight='bold')
+
+    plt.title(title, fontsize=16)
+    plt.xlabel("UMAP 1")
+    plt.ylabel("UMAP 2")
+    plt.grid(True, linestyle='--', alpha=0.4)
+
+    full_path = base_plot_path + save_name
+    plt.savefig(full_path, bbox_inches='tight')
+    plt.close()

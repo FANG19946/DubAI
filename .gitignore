@@ -31,8 +31,8 @@ __pycache__/
 json
 
 
-# not ready for commit yet
-generate_audio.py
+# Plots
+plots
 
 # Environment Variables
 .env
