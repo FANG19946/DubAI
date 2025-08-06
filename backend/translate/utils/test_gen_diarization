@@ -1,5 +1,5 @@
-from speaker_utils import gen_dialogue_array  # Your embedding function
-from speaker_utils import extract_embedding, plot_speaker_embeddings     # Your segment generation function
+from speaker_utils import gen_dialogue_array  
+from speaker_utils import extract_embedding, plot_speaker_embeddings     
 from tqdm import tqdm
 
 def main():
@@ -8,7 +8,7 @@ def main():
     base_srt_path = "data/srt/"  
 
     segments = gen_dialogue_array(
-        audio_path=  "eng_10_to_15.wav",  # replace with actual filename
+        audio_path=  "eng_10_to_15.wav", 
         srt_path= "eng_10_to_15.srt"
     )
 

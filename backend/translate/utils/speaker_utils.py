@@ -15,7 +15,7 @@ import os
 os.environ["SPEECHBRAIN_LOCAL_FILE_STRATEGY"] = "copy"
 os.environ["HF_HUB_DISABLE_SYMLINKS_WARNING"] = "1"
 
-os.environ["HF_HUB_DISABLE_SYMLINKS"] = "1"  # <-- must be before anything else
+os.environ["HF_HUB_DISABLE_SYMLINKS"] = "1"  
 os.environ["SPEECHBRAIN_LOCAL_FILE_STRATEGY"] = "copy"
 
 
