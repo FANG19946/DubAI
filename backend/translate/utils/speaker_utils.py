@@ -1,6 +1,7 @@
+# speaker_utils.py
 from pydub import AudioSegment
 from parse_srt import parse_srt
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import torch
 import torchaudio
 import numpy as np
@@ -9,7 +10,7 @@ from speechbrain.inference import SpeakerRecognition
 import matplotlib.pyplot as plt
 import seaborn as sns
 import umap
-
+from typing import Optional, List
 import os
 
 os.environ["SPEECHBRAIN_LOCAL_FILE_STRATEGY"] = "copy"
@@ -26,8 +27,11 @@ class DialogueSegment:
     start: int  # in ms
     end: int    # in ms
     audio: AudioSegment
+    embedding: Optional[np.ndarray] = None
+    temporal_neighbors: List[int] = field(default_factory=list)
+    neighbor_similarity: List[float] = field(default_factory=list)
 
-def gen_dialogue_array(audio_path, silence_duration=1000, srt_path = 'eng_10_to_15.srt' ,save_path = 'dialogue_diarization.wav' ):
+def gen_dialogue_array(audio_path, srt_path = 'eng_10_to_15.srt', temporal_span = 20000 ):
     
     base_wav_path = "data/wav/"  
     base_srt_path = "data/srt/"  
@@ -38,12 +42,35 @@ def gen_dialogue_array(audio_path, silence_duration=1000, srt_path = 'eng_10_to_
     segments = []
     
 
-
+    # If any error suddenly arises on multi video diarization this is the part to check for BUG  
     for i,sub in enumerate(subtitles):
         start = sub["start"]
         end = sub["end"]
         segment = audio[start:end]
-        segments.append(DialogueSegment(i, start, end, segment))
+        embedding = extract_embedding(segment)
+        segments.append(DialogueSegment(i+1, start, end, segment, embedding))
+
+    for i, seg in enumerate(segments):
+        
+        for j in range(i - 1, -1, -1):
+            if segments[j].end >= seg.start - temporal_span:
+                seg.temporal_neighbors.append(j+1)
+            else:
+                break
+        for j in range(i + 1, len(segments)):
+            if segments[j].start <= seg.end + temporal_span:
+                seg.temporal_neighbors.append(j+1)
+            else:
+                break
+    for seg in segments:
+        seg.temporal_neighbors.sort()
+        seg.neighbor_similarity = []
+        for j in seg.temporal_neighbors:
+            neighbor_emb = segments[j-1].embedding
+            sim = np.dot(seg.embedding, neighbor_emb) / (np.linalg.norm(seg.embedding) * np.linalg.norm(neighbor_emb))
+            seg.neighbor_similarity.append(sim)
+
+
     
     return segments
         
@@ -106,3 +133,32 @@ def plot_speaker_embeddings(embeddings, save_name="umap_clusters.png", title="Sp
     full_path = base_plot_path + save_name
     plt.savefig(full_path, bbox_inches='tight')
     plt.close()
+
+def log_all_segments(segments, top_k=2):
+    """
+    Logs each segment's index and its top-k neighbors based on similarity.
+    """
+    for seg in segments:
+        # Pair neighbors with similarities
+        neighbor_pairs = list(zip(seg.temporal_neighbors, seg.neighbor_similarity))
+        # Sort neighbors by their SRT index (ascending) instead of similarity
+        neighbor_pairs.sort(key=lambda x: x[0])  
+
+        # Take top-k
+        top_neighbors = neighbor_pairs[:top_k]
+
+        print(f"Segment {seg.index} | Top Neighbors: ", end="")
+        for j, sim in top_neighbors:
+            print(f"{j}:{sim:.3f}", end="  ")
+        print()  # newline
+
+
+if __name__ == "__main__":
+    segments = gen_dialogue_array(
+        audio_path="eng_10_to_15.wav",
+        srt_path="eng_10_to_15.srt",
+        temporal_span=20000
+    )
+
+    print(f"Total segments: {len(segments)}")
+    log_all_segments(segments,4)
