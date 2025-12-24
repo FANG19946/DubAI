@@ -53,6 +53,8 @@ This file basically matches the generated audio segments to the length of the or
 
 ### speaker_utils.py
 This was the last thing I was working on trying to get speaker diarization and mapping and coming up with way for speaker diarization
+Now that I have worked a little more on this I have realised its really difficult to rely on Global similarity in embeddings and currently I am using an approach where I find segments in the neighborhood of the segment I need more samples of and then find similarity between them and select the top 2 ones, it seems like a good choice to expand the speaker audio.
+Now for the next part in this is to actually expand the speaker recordings in a BFS like fashion and to anchor it more towards the original audio we can use a weight like alpha when we use it with the other recordings which essentially becomes a hyperparameter
 
 ### test_gen_diarization
 This is the captain function for the diarization part

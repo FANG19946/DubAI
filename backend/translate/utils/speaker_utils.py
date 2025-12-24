@@ -29,7 +29,9 @@ class DialogueSegment:
     audio: AudioSegment
     embedding: Optional[np.ndarray] = None
     temporal_neighbors: List[int] = field(default_factory=list)
-    neighbor_similarity: List[float] = field(default_factory=list)
+    # These 2 fields really are bad practices, scheduled for CLEAN UP
+    # neighbor_similarity: List[float] = field(default_factory=list)
+    collected_audio: Optional[AudioSegment] = None
 
 def gen_dialogue_array(audio_path, srt_path = 'eng_10_to_15.srt', temporal_span = 20000 ):
     
@@ -62,13 +64,7 @@ def gen_dialogue_array(audio_path, srt_path = 'eng_10_to_15.srt', temporal_span 
                 seg.temporal_neighbors.append(j+1)
             else:
                 break
-    for seg in segments:
-        seg.temporal_neighbors.sort()
-        seg.neighbor_similarity = []
-        for j in seg.temporal_neighbors:
-            neighbor_emb = segments[j-1].embedding
-            sim = np.dot(seg.embedding, neighbor_emb) / (np.linalg.norm(seg.embedding) * np.linalg.norm(neighbor_emb))
-            seg.neighbor_similarity.append(sim)
+    
 
 
     
@@ -134,6 +130,74 @@ def plot_speaker_embeddings(embeddings, save_name="umap_clusters.png", title="Sp
     plt.savefig(full_path, bbox_inches='tight')
     plt.close()
 
+
+
+
+def update_embedding_anchor(
+    embedding_anchor: np.ndarray,
+    new_embedding: np.ndarray,
+    alpha: float = 0.7
+) -> np.ndarray:
+    """
+    Updates the speaker embedding anchor using a new segment embedding.
+
+    Args:
+        (X, Y, alpha) -> alpha * X + ( 1 - alpha ) * Y  
+        (default 0.7)
+
+    Returns:
+        Normalized updated embedding anchor
+    """
+    if not (0 < alpha < 1):
+        raise ValueError("alpha must be in (0, 1)")
+
+    combined = alpha * embedding_anchor + (1 - alpha) * new_embedding
+    return combined / np.linalg.norm(combined)
+
+
+def cosine_similarity(a: np.ndarray, b: np.ndarray) -> float:
+    return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
+
+def get_k_similar_neighbors(
+    seg: DialogueSegment,
+    segments: List[DialogueSegment],
+    base_embedding: np.ndarray,
+    k: int = 2,
+) -> List[int]:
+    """
+    Returns top-k most similar temporal neighbors of `seg` using a weighted embedding anchor.
+
+    Args:
+        seg: The DialogueSegment for which neighbors are being selected.
+        segments: List of all DialogueSegments.
+        base_embedding: The current reference embedding to update with seg.embedding.
+        k: Number of top neighbors to return.
+        alpha: Weight for embedding_anchor (how much to bias towards base_embedding).
+
+    Returns:
+        List of neighbor indices (1-based, SRT indexing) sorted by similarity descending.
+    """
+    if seg.embedding is None:
+        return []
+
+    # Compute the updated anchor once
+    updated_anchor = update_embedding_anchor(base_embedding, seg.embedding, 0.9)
+
+    scored_neighbors = []
+    for neighbor_idx in seg.temporal_neighbors:
+        neighbor_seg = segments[neighbor_idx - 1]  # convert 1-based to 0-based
+        if neighbor_seg.embedding is None:
+            continue
+        sim = cosine_similarity(updated_anchor, neighbor_seg.embedding)
+        scored_neighbors.append((neighbor_idx, sim))
+
+    # Sort by similarity descending
+    scored_neighbors.sort(key=lambda x: x[1], reverse=True)
+
+    # Return only the indices of top-k neighbors
+    return [idx for idx, _ in scored_neighbors[:k]]
+
+
 def log_all_segments(segments, top_k=2):
     """
     Logs each segment's index and its top-k neighbors based on similarity.
@@ -151,6 +215,7 @@ def log_all_segments(segments, top_k=2):
         for j, sim in top_neighbors:
             print(f"{j}:{sim:.3f}", end="  ")
         print()  # newline
+
 
 
 if __name__ == "__main__":
