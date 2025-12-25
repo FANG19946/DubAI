@@ -29,6 +29,7 @@ __pycache__/
 
 # dumps and json
 json
+collected_audio_test
 
 
 # Plots

@@ -1,4 +1,4 @@
-# A tool that can dub videos using AI
+# AI-Driven Multilingual Video Dubbing
 
 - Generate subtitles .srt file from video using Whisper
 - Translate subtitles using IndicTrans2
@@ -52,12 +52,21 @@ This file basically matches the generated audio segments to the length of the or
 *`I think later on I can refactor this to be done as the audio segments are generated to increase parallelism but that is not an immediate concern for now at all`*
 
 ### speaker_utils.py
-This was the last thing I was working on trying to get speaker diarization and mapping and coming up with way for speaker diarization
-Now that I have worked a little more on this I have realised its really difficult to rely on Global similarity in embeddings and currently I am using an approach where I find segments in the neighborhood of the segment I need more samples of and then find similarity between them and select the top 2 ones, it seems like a good choice to expand the speaker audio.
+I am using an approach where I find segments in the neighborhood of the segment I need more samples of and then find similarity between them and select the top 2 ones, it seems like a good choice to expand the speaker audio.
 Now for the next part in this is to actually expand the speaker recordings in a BFS like fashion and to anchor it more towards the original audio we can use a weight like alpha when we use it with the other recordings which essentially becomes a hyperparameter
+Now that I have completed the aforesaid things, also I was thinking if it was a good idea to use and update embedding anchor like 
+
+*alpha * sim(base) + (1-alpha) * sim(neighbor)*
+*(This wont update the embedding but instead choose ones which are directly weighing similarity of the base embedding)*
+
+Based on Preliminary and very initial analysis the current speaker collection has gone pretty well and is expected to produce good results
+
+*`A few caveats are music detection and seperation from audio`*
 
 ### test_gen_diarization
 This is the captain function for the diarization part
+
+*`Now after completing speaker_utils this file has become outdated and will be repurposed or deleted`*
 
 ### translate_utils.py
 This is the heart of the IndicTrans2 English SRT to Hindi SRT generator and hold the functions with the core functionality
