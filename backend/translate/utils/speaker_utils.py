@@ -301,6 +301,32 @@ def log_all_segments(segments, top_k=2):
         print()  # newline
 
 
+def export_speaker_cache( segments, out_dir="data/speaker_cache"):
+    """
+    Exports collected speaker audio per segment and returns a mapping:
+    { segment_index (int) : wav_path (str) }
+    """
+    os.makedirs(out_dir, exist_ok=True)
+    speaker_map = {}
+
+    for seg in segments:
+        if seg.collected_audio is None:
+            continue
+
+        wav_path = os.path.join(out_dir, f"speaker_{seg.index}.wav")
+
+        if not os.path.exists(wav_path):
+            audio = (
+                seg.collected_audio
+                .set_channels(1)
+                .set_frame_rate(16000)
+            )
+            audio.export(wav_path, format="wav")
+
+        speaker_map[seg.index] = wav_path
+
+    return speaker_map
+
 
 if __name__ == "__main__":
     import os

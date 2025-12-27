@@ -17,7 +17,7 @@ base_json_path = "data/json/"
 
 
 
-def generate_audio(subtitles, speaker_wav, input_audio_path, output_audio_path):
+def generate_audio(subtitles, speaker_map, input_audio_path, output_audio_path):
     """
     Replaces segments in input audio using XTTS-dubbed subtitles.
     """
@@ -58,6 +58,13 @@ def generate_audio(subtitles, speaker_wav, input_audio_path, output_audio_path):
             print(f"⚠️ Skipping non-speakable subtitle at index {sub.get('index', i)}: {repr(text)}")
             continue
 
+        # Adding the speaker_wav from speaker_map
+        seg_index = sub["index"]
+        if seg_index not in speaker_map:
+            print(f"⚠️ No speaker reference for segment {seg_index}, skipping") #BUG Instead of this add a single instance speaker audio of the segment if collected audio even failed to ensure graceful degradation
+            continue
+        speaker_wav = speaker_map[seg_index]
+        
         # Generate audio with XTTS
         wav_array = tts.tts(text=text, speaker_wav=speaker_wav, language="hi")
 
