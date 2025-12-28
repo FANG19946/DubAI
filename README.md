@@ -8,6 +8,21 @@ This is all for now
 
 I am coming back to this after a long gap so this is me trying to piece everything back together
 
+### *Current Checkpoint*
+We have a working system at the moment which can generate the audio from the collected samples and doesnt rely on a pre selected voice
+
+Currently the Librosa Patch is not being implemented automatically due to some issues that have propped up
+
+The generated audio is noisy and unintelligible I suspect either due to 
+
+*The input audio being in English*
+*or*
+*Overlapping vocals with background music*
+
+##### Next Steps
+Confirming the source of the current problems and solving them
+I have high hopes for Vocal Isolation 
+
 ### dub_audio/generate_audio
 This function seems to be the main part that generates the hindi audio using xtts from the translated hindi SRT and at the end it also makes a hindi_dub.json which has things like:
 
@@ -20,7 +35,9 @@ This function seems to be the main part that generates the hindi audio using xtt
       "dub_start": 0,
       "dub_end": 8118
       },
-Container Name:
+
+**`Container Name: coqui-tts`**
+**`Image ID: sha256:77bfa1a38cb67c3e3ebfd37fad1eda6b7a6e3110fa81739851e59ae271c5e05f`**
 
 
 ### gen_audio.py
@@ -33,7 +50,9 @@ It calls parse_srt which basically just parses the srt file and returns an array
     "start": start_ms,
     "end": end_ms
 next it calls the generate_audio to generate the output audio and json 
-Container Name:
+
+**`Container Name: coqui-tts`**
+**`Image ID: sha256:77bfa1a38cb67c3e3ebfd37fad1eda6b7a6e3110fa81739851e59ae271c5e05f`**
 ***Important for running, Useless for debugging***
 
 

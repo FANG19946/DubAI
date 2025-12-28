@@ -6,11 +6,12 @@ def main():
     base_srt_path = "data/srt/"  
     base_wav_path = "data/wav/"  
 
-
-    srt_path = base_srt_path + "hi_10_to_15.srt"
-    input_audio = base_wav_path + "eng_10_to_15.wav"
+    audio_file = "eng_10_to_15.wav"
+    srt_file = "hi_10_to_15.srt"
+    srt_path = base_srt_path + srt_file
+    input_audio = base_wav_path + audio_file
     output_audio = base_wav_path + "hi_10_to_15.wav"
-    segments = gen_dialogue_array(input_audio, srt_path)
+    segments = gen_dialogue_array(audio_file, srt_file)
     speaker_map = export_speaker_cache(segments)
 
     # Step 1: Parse subtitle file
